@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Добавить работу</h1>
+
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    {{ form.csrf_token }}
+    <p>
+        {{ form.job.label }}<br>
+        {{ form.job(class="form-control", value=current_job.job) }}<br>
+        {% for error in form.job.errors %}
+        <p class="alert alert-danger" role="alert">
+            {{ error }}
+        </p>
+    {% endfor %}
+    </p>
+    <p>
+        {{ form.team_leader_id.label }}<br>
+        {{ form.team_leader_id(class="form-control", value=current_job.team_leader_id) }}<br>
+        {% for error in form.team_leader_id.errors %}
+    <p class="alert alert-danger" role="alert">
+        {{ error }}
+    </p>
+    {% endfor %}
+    </p>
+    <p>
+        {{ form.work_size.label }}<br>
+        {{ form.work_size(class="form-control", value=current_job.work_size) }}<br>
+        {% for error in form.work_size.errors %}
+    <p class="alert alert-danger" role="alert">
+        {{ error }}
+    </p>
+    {% endfor %}
+    </p>
+    <p>
+        {{ form.collaborators.label }}<br>
+        {{ form.collaborators(class="form-control", value=current_job.collaborators) }}<br>
+        {% for error in form.collaborators.errors %}
+    <p class="alert alert-danger" role="alert">
+        {{ error }}
+    </p>
+    {% endfor %}
+    </p>
+
+    {% if current_job.is_finished == 1 %}
+        <p>{{ form.is_finished(checked="checked") }} {{ form.is_finished.label }}</p>
+    {% else %}
+        <p>{{ form.is_finished() }} {{ form.is_finished.label }}</p>
+    {% endif %}
+
+    <p>{{ form.submit(type="submit", class="btn btn-primary")}}</p>
+    {{message}}
+</form>
+{% endblock %}

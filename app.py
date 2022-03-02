@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect
-from flask_login import login_user, LoginManager, login_required, logout_user
+from flask_login import login_user, LoginManager, login_required, logout_user, current_user
 
 from data import db_session
 from data.jobs import Jobs
@@ -76,12 +76,13 @@ def get_form():
     return render_template('register.html', title='Регистрация', form=form)
 
 
-@app.route('/addjob', methods=['GET', 'POST'])
+@app.route('/add_job', methods=['GET', 'POST'])
 @login_required
 def addjob():
+    session = db_session.create_session()
+
     add_job_form = AddJobForm()
     if add_job_form.validate_on_submit():
-        session = db_session.create_session()
         job = Jobs(
             team_leader_id=add_job_form.team_leader_id.data,
             job=add_job_form.job.data,
@@ -94,6 +95,31 @@ def addjob():
 
         return redirect("/")
     return render_template("add_job.html", form=add_job_form)
+
+
+@app.route('/edit_job/<job_id>', methods=['GET', 'POST'])
+@login_required
+def edit_job(job_id):
+    session = db_session.create_session()
+    jobs = session.query(Jobs).all()
+    add_job_form = AddJobForm()
+    current_job = session.query(Jobs).filter(Jobs.id == int(job_id)).first()
+
+    if current_user.id == 1 or current_user.id == current_job.team_leader_id:
+
+        if add_job_form.validate_on_submit():
+
+            current_job.team_leader_id = add_job_form.team_leader_id.data
+            current_job.job = add_job_form.job.data
+            current_job.work_size = add_job_form.work_size.data
+            current_job.collaborators = add_job_form.collaborators.data
+            current_job.is_finished = add_job_form.is_finished.data
+
+            session.commit()
+
+            return redirect("/")
+        return render_template('edit_job.html', form=add_job_form, current_job=current_job)
+    return render_template('list.html', jobs=jobs, message='Вы не имеете достаточно прав')
 
 
 @app.route('/logout')
