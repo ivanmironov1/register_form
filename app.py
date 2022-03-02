@@ -111,7 +111,6 @@ def edit_job(job_id):
     if current_user.id == 1 or current_user.id == current_job.team_leader_id:
 
         if add_job_form.validate_on_submit():
-
             current_job.team_leader_id = add_job_form.team_leader_id.data
             current_job.job = add_job_form.job.data
             current_job.work_size = add_job_form.work_size.data
@@ -129,13 +128,14 @@ def edit_job(job_id):
 @login_required
 def delete_job(job_id):
     session = db_session.create_session()
+    jobs = session.query(Jobs).all()
     current_job = session.query(Jobs).filter(Jobs.id == int(job_id)).first()
 
     if current_user.id == 1 or current_user.id == current_job.team_leader_id:
         session.delete(current_job)
         session.commit()
-
-    return redirect("/")
+        return redirect("/")
+    return render_template('list.html', jobs=jobs, message='Вы не имеете достаточно прав')
 
 
 @app.route('/logout')

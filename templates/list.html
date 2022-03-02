@@ -2,7 +2,11 @@
 
 {% block content %}
 <p>{{ message }}</p>
-<a class="btn btn-success" href="/addjob">Добавить работу</a>
+
+{% if current_user.is_authenticated %}
+<a class="btn btn-success" href="/add_job">Добавить работу</a>
+{% endif %}
+
 
 {% for job in jobs %}
 <h2>Action #{{job.id}}</h2>
@@ -26,6 +30,12 @@
       {% endif %}
     </tr>
   </table>
+
+  {% if current_user.is_authenticated and (current_user.id == 1 or current_user.id == job.team_leader_id) %}
+    <a href="/edit_job/{{ job.id }}" class="btn btn-warning">Edit Job</a>
+    <a href="/delete_job/{{ job.id }}" class="btn btn-danger">Delete Job</a>
+  {% endif %}
+
 {% endfor %}
 
 {% endblock %}
