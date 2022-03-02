@@ -1,3 +1,5 @@
+import datetime
+
 from flask import Flask, render_template, request, redirect
 from flask_login import login_user, LoginManager, login_required, logout_user, current_user
 
@@ -89,6 +91,7 @@ def addjob():
             work_size=add_job_form.work_size.data,
             collaborators=add_job_form.collaborators.data,
             is_finished=add_job_form.is_finished.data,
+            start_date=datetime.datetime.now()
         )
         session.add(job)
         session.commit()
@@ -120,6 +123,19 @@ def edit_job(job_id):
             return redirect("/")
         return render_template('edit_job.html', form=add_job_form, current_job=current_job)
     return render_template('list.html', jobs=jobs, message='Вы не имеете достаточно прав')
+
+
+@app.route('/delete_job/<job_id>', methods=['GET', 'POST'])
+@login_required
+def delete_job(job_id):
+    session = db_session.create_session()
+    current_job = session.query(Jobs).filter(Jobs.id == int(job_id)).first()
+
+    if current_user.id == 1 or current_user.id == current_job.team_leader_id:
+        session.delete(current_job)
+        session.commit()
+
+    return redirect("/")
 
 
 @app.route('/logout')
