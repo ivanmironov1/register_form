@@ -4,6 +4,7 @@
 <p>{{ message }}</p>
 
 {% if current_user.is_authenticated %}
+<a class="btn btn-success" href="/departments">Departments</a>
 <a class="btn btn-success" href="/add_job">Добавить работу</a>
 {% endif %}
 

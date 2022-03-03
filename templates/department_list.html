@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p>{{ message }}</p>
+
+{% if current_user.is_authenticated %}
+<a class="btn btn-success" href="/">Jobs</a>
+<a class="btn btn-success" href="/add_department">Добавить Департамент</a>
+{% endif %}
+
+
+{% for department in departments %}
+<h2>Department #{{department.id}}</h2>
+  <table class="table">
+    <tr class="table-secondary">
+      <th width="25%">Title of department</th>
+      <th width="20%">Chief</th>
+      <th width="20%">Members</th>
+      <th width="20%">Department mail</th>
+    </tr>
+    <tr class="table-primary">
+      <th>{{ department.title }}</th>
+      <th>{{ department.chief.name }} {{ department.chief.surname }}</th>
+      <th>{{ department.members }}</th>
+      <th>{{ department.email }}</th>
+    </tr>
+  </table>
+
+  {% if current_user.is_authenticated and (current_user.id == 1 or current_user.id == department.chief_id) %}
+    <a href="/edit_department/{{ department.id }}" class="btn btn-warning">Edit department</a>
+    <a href="/delete_department/{{ department.id }}" class="btn btn-danger">Delete department</a>
+  {% endif %}
+
+{% endfor %}
+
+{% endblock %}
