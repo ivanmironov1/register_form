@@ -1,6 +1,6 @@
 import datetime
 
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, make_response, jsonify
 from flask_login import login_user, LoginManager, login_required, logout_user, current_user
 
 from data import db_session
@@ -11,11 +11,18 @@ from forms.add_department import AddDepartmentForm
 from forms.add_job import AddJobForm
 from forms.login import LoginForm
 from forms.register import RegisterForm
-from pprint import pprint
+from api import jobs_api
+from api import users_api
+
+from requests import get
+from io import BytesIO
+from PIL import Image
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 db_session.global_init("db/base.db")
+app.register_blueprint(jobs_api.blueprint)
+app.register_blueprint(users_api.blueprint)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -205,6 +212,52 @@ def get_form():
     return render_template('register.html', title='Регистрация', form=form)
 
 
+@app.route('/users_show/<int:user_id>')
+def users_show(user_id):
+    user = get(f'http://127.0.0.1:5000/api/users/{user_id}').json()['user']
+    print(user)
+    user_name = user['name'] + ' ' + user['surname']
+
+    toponym_to_find = user['hometown']
+    geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
+
+    geocoder_params = {
+        "apikey": "40d1649f-0493-4b70-98ba-98533de7710b",
+        "geocode": toponym_to_find,
+        "format": "json"}
+
+    response = get(geocoder_api_server, params=geocoder_params)
+
+    if not response:
+        # обработка ошибочной ситуации
+        pass
+
+    # Преобразуем ответ в json-объект
+    json_response = response.json()
+    # Получаем первый топоним из ответа геокодера.
+    toponym = json_response["response"]["GeoObjectCollection"][
+        "featureMember"][0]["GeoObject"]
+    # Координаты центра топонима:
+    toponym_coodrinates = toponym["Point"]["pos"]
+    # Долгота и широта:
+    toponym_longitude, toponym_lattitude = toponym_coodrinates.split(" ")
+
+    delta = "0.1"
+
+    # Собираем параметры для запроса к StaticMapsAPI:
+    map_params = {
+        "ll": ",".join([toponym_longitude, toponym_lattitude]),
+        "spn": ",".join([delta, delta]),
+        "l": "map"
+    }
+
+    map_api_server = "http://static-maps.yandex.ru/1.x/"
+    # ... и выполняем запрос
+    response = get(map_api_server, params=map_params)
+    with open('static/map.png', 'wb') as file:
+        file.write(response.content)
+
+    return render_template('nostalgy.html', user_name=user_name, hometown=toponym_to_find)
 
 
 @app.route('/logout')
@@ -212,3 +265,8 @@ def get_form():
 def logout():
     logout_user()
     return redirect("/")
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
