@@ -6,13 +6,13 @@ session = db_session.create_session()
 
 user = User()
 user.surname = "Kiril"
-user.name = "Petrov"
+user.name = "Ivanov"
 user.age = 90
 user.position = "middle"
-user.hometown = 'Чемошур'
-user.speciality = "research engineer"
-user.address = "module_2"
-user.email = "petrov@mars.org"
+user.hometown = 'Зура'
+user.speciality = "researcher"
+user.address = "module_4"
+user.email = "Ivanov@mars.org"
 user.set_password('qwerty123')
 session.add(user)
 session.commit()

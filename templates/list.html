@@ -13,10 +13,11 @@
 <h2>Action #{{job.id}}</h2>
   <table class="table">
     <tr class="table-secondary">
-      <th width="25%">Title of activity</th>
+      <th width="20%">Title of activity</th>
       <th width="20%">Team leader</th>
       <th width="15%">Duration</th>
-      <th width="20%">List of collaborators</th>
+      <th width="10%">List of collaborators</th>
+      <th width="15%">Hazard category</th>
       <th width="20%">Is finished</th>
     </tr>
     <tr class="table-primary">
@@ -24,6 +25,11 @@
       <th>{{ job.team_leader.name }} {{ job.team_leader.surname }}</th>
       <th>{{ job.work_size }} hours</th>
       <th>{{ job.collaborators }}</th>
+      <th>
+        {% for category in job.categories %}
+          {{ category.name }}
+        {% endfor %}
+      </th>
       {% if job.is_finished %}
       <th class="table-success">Is finished</th>
       {% else %}

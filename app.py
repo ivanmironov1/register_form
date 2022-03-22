@@ -15,8 +15,6 @@ from api import jobs_api
 from api import users_api
 
 from requests import get
-from io import BytesIO
-from PIL import Image
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -38,6 +36,9 @@ def load_user(user_id):
 def index():
     session = db_session.create_session()
     jobs = session.query(Jobs).all()
+    # job = session.query(Jobs).get(1)
+    # for category in job.categories:
+    #     print(category.name)
 
     return render_template('list.html', jobs=jobs)
 
