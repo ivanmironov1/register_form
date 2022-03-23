@@ -2,7 +2,9 @@ import datetime
 
 from flask import Flask, render_template, request, redirect, make_response, jsonify
 from flask_login import login_user, LoginManager, login_required, logout_user, current_user
+from flask_restful import Api
 
+from api.users_resource import UsersListResource, UsersResource
 from data import db_session
 from data.departments import Department
 from data.jobs import Jobs
@@ -19,8 +21,10 @@ from requests import get
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 db_session.global_init("db/base.db")
-app.register_blueprint(jobs_api.blueprint)
-app.register_blueprint(users_api.blueprint)
+
+api = Api(app)
+api.add_resource(UsersListResource, '/api/v1/users')
+api.add_resource(UsersResource, '/api/v1/users/<int:user_id>')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
